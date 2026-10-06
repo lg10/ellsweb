@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EllS · 活在终端里的轻量级跨平台 SSH 客户端</title>
+<meta name="description" content="EllS 是用 Rust 编写的一体化终端 SSH 客户端：TUI 内嵌真正的 vt100 终端、加密凭据保险库、SFTP 文件浏览、Xshell 风格的 sz/rz 传输拦截、多会话标签页与应用内更新。支持 Windows、macOS 与 Linux，一行命令安装。">
+<meta name="theme-color" content="#0b0f14">
+<link rel="icon" href="favicon.svg">
+<link rel="preconnect" href="https://github.com">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="nav" id="top">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">&gt;_</span>
+      <span class="brand-name">EllS</span>
+      <span class="brand-tag" data-i18n="brand.tag">终端里的 SSH 客户端</span>
+    </a>
+    <nav class="links" aria-label="主导航">
+      <a href="#features" data-i18n="nav.features">功能</a>
+      <a href="#screens" data-i18n="nav.screens">界面</a>
+      <a href="#install" data-i18n="nav.install">安装</a>
+      <a href="#usage" data-i18n="nav.usage">使用</a>
+      <a href="#keys" data-i18n="nav.keys">快捷键</a>
+      <a href="#faq" data-i18n="nav.faq">常见问题</a>
+    </nav>
+    <div class="nav-right">
+      <span class="chip chip-ver" id="version-chip">v0.1.7</span>
+      <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">EN</button>
+      <a class="btn btn-ghost" href="https://github.com/lg10/ells" target="_blank" rel="noopener" data-i18n="nav.github">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1><span class="grad">EllS</span></h1>
+      <p class="lede" data-i18n="hero.lede">一个活在终端里的轻量级跨平台 SSH 客户端。</p>
+      <p class="sub" data-i18n="hero.sub">纯 Rust 编写，在高速 TUI 里内嵌一个真正的终端模拟器：远程会话的颜色、vim / htop 都能正确渲染。同时补齐了原生 ssh 命令缺少的工作流能力——加密凭据保险库、SFTP 文件浏览、Xshell 风格的 sz/rz 传输拦截，全部只需几个按键或一次鼠标点击。</p>
+
+      <div class="osbox" id="osbox">
+        <div class="osbox-head">
+          <span class="osbox-label" id="osbox-label">正在识别你的系统…</span>
+          <span class="osbox-bits" id="osbox-bits"></span>
+        </div>
+        <div class="os-tabs" role="tablist" aria-label="平台">
+          <button type="button" class="os-tab" data-os="windows" role="tab">Windows</button>
+          <button type="button" class="os-tab" data-os="macos" role="tab">macOS</button>
+          <button type="button" class="os-tab" data-os="linux" role="tab">Linux</button>
+        </div>
+        <div class="cmd" id="cmd">
+          <code id="cmd-text">irm https://raw.githubusercontent.com/lg10/ells/main/install.ps1 | iex</code>
+          <button type="button" class="copy" id="cmd-copy" data-i18n-attr="aria-label:hero.copy" aria-label="复制命令"><span data-i18n="hero.copy">复制</span></button>
+        </div>
+        <p class="osbox-foot" id="cmd-shell-note" data-i18n="hero.shell.powershell">在 PowerShell 里运行；脚本会强制校验 SHA256SUMS.txt，校验不过直接退出。</p>
+        <p class="osbox-note" data-i18n="hero.reopen">装完<strong>重新打开终端</strong>，<code>ells</code> 与短命令 <code>s</code> 就能直接用。</p>
+      </div>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#install" data-i18n="hero.cta.install">查看完整安装说明</a>
+        <a class="btn btn-ghost" href="https://github.com/lg10/ells/releases" target="_blank" rel="noopener" data-i18n="hero.cta.release">下载预编译包</a>
+      </div>
+
+      <ul class="badges">
+        <li><span data-i18n="hero.badge.license">MIT 开源</span></li>
+        <li><span data-i18n="hero.badge.platform">Windows · macOS · Linux</span></li>
+        <li><span data-i18n="hero.badge.telemetry">零遥测</span></li>
+        <li><span data-i18n="hero.badge.size">单文件二进制，无运行时依赖</span></li>
+      </ul>
+    </div>
+
+    <div class="hero-shot">
+      <!-- 截图 1：主机列表 -->
+      <div class="term" data-screen="list">
+        <div class="term-chrome">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="term-title">ells-主机列表</span>
+          <span class="term-size">80 × 24</span>
+        </div>
+        <div class="term-body">
+          <div class="t-row t-band">
+            <b class="c-accent">&nbsp;ells&nbsp;</b><span class="c-dim">主机列表 · v0.1.7 · 构建 2026-10-06 09:12</span><span class="grow"></span><b class="badge-warn">【v0.1.8 可更新】</b><b class="badge-sel">官网(ells.cn)</b>
+          </div>
+          <div class="t-row t-tab">
+            <b class="sel"> 1:pay-api </b><span class="rule">│</span><span class="tabidle"> 2:db-prod </span><span class="rule">│</span><span class="tabidle"> 3:mysql-cache </span><span class="rule">│</span><b class="c-accent"> + </b><span class="c-dim">&nbsp;F2 新建 · F5/F6 切换 · Ctrl-] 关闭标签</span>
+          </div>
+          <div class="t-row t-list is-sel"><span class="c-ok">●</span><b class="c-warn">pay-api</b><span class="c-text">deploy@203.0.113.24:22</span><span class="c-muted">[密码]</span></div>
+          <div class="t-row t-list"><span class="c-ok">●</span><b class="c-warn">db-prod</b><span class="c-text">backup@198.51.100.7:22</span><span class="c-muted">[密钥]</span><span class="c-alt">经 bastion</span></div>
+          <div class="t-row t-list"><span class="c-warn">○</span><b class="c-warn">mysql-cache</b><span class="c-text">appuser@198.51.100.30:22</span><span class="c-muted">[密码]</span></div>
+          <div class="t-row t-list"><span class="c-dim">·</span><b class="c-warn">staging-01</b><span class="c-text">ci@203.0.113.101:22</span><span class="c-muted">[密钥]</span></div>
+          <div class="t-row t-list"><span class="c-dim">·</span><b class="c-warn">edge-hk</b><span class="c-text">svc@203.0.113.55:22</span><span class="c-muted">[密码]</span></div>
+          <div class="t-row t-pad"></div>
+          <div class="t-row t-band"><span class="c-dim">&nbsp;● 已连接（Enter 或点顶部标签切回那一格）· ○ 正在连接 · 断开用 Ctrl-]（只断这一格）</span></div>
+          <div class="t-row t-band"><span class="c-dim">&nbsp;↑↓ 选择 · Enter 连接/切回 · a 新增 · e 编辑 · d 删除 · i 导入 · s 设置 · ? 帮助 · q 退出&nbsp;</span><b class="badge-cyan">【设置】</b></div>
+        </div>
+      </div>
+      <p class="shot-cap" data-i18n="shot.list.cap">主机列表：一行一台服务器，<code>●</code> 表示已经连着，Enter 直接连或切回那一格标签。</p>
+    </div>
+  </div>
+
+  <p class="ip-note wrap" data-i18n="screens.ipnote">🔒 本站的界面图按 EllS 真实渲染逐字还原；其中的主机地址与用户名一律替换为文档保留地址（203.0.113.0/24、198.51.100.0/24）与示例账号，不含任何真实 IP。</p>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="features">
+  <div class="wrap">
+    <h2 data-i18n="features.h2">它能做什么</h2>
+    <p class="section-sub" data-i18n="features.sub">EllS 不做 GUI，也不接管你的终端模拟器；它把 SSH 工作流里那些"原生 ssh 缺的东西"补齐成几个按键或一次点击。</p>
+    <div class="grid grid-feat">
+      <article class="card"><span class="ico">🔐</span><h3 data-i18n="f.vault.t">加密保险库</h3><p data-i18n="f.vault.d">主机与密码存于 <code>~/.ells/vault.bin</code>，由主密码保护：Argon2id 派生密钥 + XChaCha20Poly1305 认证加密。支持免密自动解锁、应用内改主密码。</p></article>
+      <article class="card"><span class="ico">🗂</span><h3 data-i18n="f.hosts.t">主机管理与跳板机</h3><p data-i18n="f.hosts.d">别名、按主机的认证方式（密码 / 私钥）、备注，以及 ProxyJump 跳板：<code>ells → 跳板 → 目标</code>，内置循环检测。</p></article>
+      <article class="card"><span class="ico">⌨️</span><h3 data-i18n="f.keys.t">私钥格式通吃</h3><p data-i18n="f.keys.d">PKCS#8、PKCS#1 RSA、OpenSSH 格式，连旧式 DEK-Info / 3DES 加密 PEM 也由 EllS 原生解密，不用先转格式。</p></article>
+      <article class="card"><span class="ico">🖥</span><h3 data-i18n="f.term.t">内嵌真终端</h3><p data-i18n="f.term.d">vt100 模拟器完整支持 ANSI / 256 色 / 真彩色，vim、htop 正常显示。<code>Ctrl-Q</code> 一键切直通模式当逃生门，<code>Ctrl-L</code> 重绘。</p></article>
+      <article class="card"><span class="ico">📦</span><h3 data-i18n="f.zmodem.t">sz / rz 拦截</h3><p data-i18n="f.zmodem.d">在远端输出流做协议级 ZMODEM 握手检测（针对真实 lrzsz 字节流反复调校），自动改走 SFTP 通道：有进度条、有系统原生文件对话框，远端不需要 ZMODEM 服务端配合。</p></article>
+      <article class="card"><span class="ico">📁</span><h3 data-i18n="f.sftp.t">SFTP 文件浏览器</h3><p data-i18n="f.sftp.d">会话内 <code>Ctrl-S</code> 打开：<code>Enter</code> 进入/下载、<code>u</code> 上传、<code>d</code> 下载，支持鼠标点击与滚轮，顶部聚合进度条 + 传输详情弹窗。</p></article>
+      <article class="card"><span class="ico">🎨</span><h3 data-i18n="f.hl.t">输出高亮</h3><p data-i18n="f.hl.d"><code>docker ps</code> 按列分色（容器 ID / 镜像名 / 版本标签 / 容器名各一档，命令弱化），还有 kubectl、日志级别、HTTP 方法、IPv4、百分比即时着色——且绝不覆盖程序自己发出的 ANSI 颜色。</p></article>
+      <article class="card"><span class="ico">🪟</span><h3 data-i18n="f.tabs.t">多会话标签页</h3><p data-i18n="f.tabs.d">一个进程同时挂多台服务器：<code>F2</code> 新建、<code>F5</code>/<code>F6</code> 或点标签切换、<code>Ctrl-]</code> 关闭。后台标签的输出与传输继续跑，切回来还在。</p></article>
+      <article class="card"><span class="ico">🔑</span><h3 data-i18n="f.tofu.t">主机密钥 TOFU</h3><p data-i18n="f.tofu.d">首次连接确认并记入 <code>~/.ells/known_hosts</code>（OpenSSH 兼容格式，也读 <code>~/.ssh/known_hosts</code>）；密钥变化时阻断告警。批量场景用 <code>-y</code> 只放行首次，密钥变更仍然拒绝。</p></article>
+      <article class="card"><span class="ico">🔄</span><h3 data-i18n="f.update.t">应用内更新</h3><p data-i18n="f.update.d">启动时后台查一次新版（一个 HEAD 请求，不占匿名 API 限额），顶部出可更新徽标；点一下确认就下载、按 <code>SHA256SUMS.txt</code> 流式校验后原地替换自身，校验不过绝不替换。</p></article>
+      <article class="card"><span class="ico">🔌</span><h3 data-i18n="f.keep.t">空闲保活 · 鼠标友好</h3><p data-i18n="f.keep.d">可配置 SSH keepalive（15–300 秒）扛住云服务器 NAT 空闲断连；拖选复制（OSC 52）、滚轮回看历史且保留颜色、各界面元素可点击。</p></article>
+      <article class="card"><span class="ico">🌏</span><h3 data-i18n="f.zh.t">全中文界面 · 可选主题</h3><p data-i18n="f.zh.d">界面全中文、系统原生文件对话框、零遥测；配色抽成主题层，四套主题（深色 / 跟随终端 / 高对比 / 浅色底）即时预览。主机列表按 <code>i</code> 还能一键导入 <code>~/.ssh/config</code>。</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREENS ============ -->
+<section id="screens" class="alt">
+  <div class="wrap">
+    <h2 data-i18n="screens.h2">界面长什么样</h2>
+    <p class="section-sub" data-i18n="screens.sub">每一屏都是纯键盘 + 可鼠标点击的双轨操作；下面五张图对应真实渲染的文案与配色。</p>
+
+    <div class="shots">
+
+      <figure class="shot">
+        <div class="term" data-screen="session">
+          <div class="term-chrome"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">ells-pay-api</span><span class="term-size">96 × 30</span></div>
+          <div class="term-body">
+            <div class="t-row t-band"><b class="c-accent">&nbsp;ells&nbsp;</b><span class="c-warn">● pay-api · deploy@203.0.113.24:22</span><b class="c-ok">&nbsp;● 内嵌&nbsp;</b><span class="grow"></span><span class="c-dim">Ctrl-Q 切模式 · Ctrl-S 文件 · Ctrl-L 重绘 · F3 搜索 · Ctrl-G 列表</span></div>
+            <div class="t-row t-tab"><b class="sel"> 1:pay-api </b><span class="rule">│</span><span class="tabidle"> 2:db-prod </span><span class="rule">│</span><b class="c-accent"> + </b><span class="c-dim">&nbsp;F2 新建 · F5/F6 切换 · Ctrl-] 关闭标签</span></div>
+            <div class="t-row t-band"><span class="c-dim">&nbsp;点击上方按钮或输入 sz/rz 传输文件 · 滚轮回看输出 · 拖选复制</span></div>
+            <div class="t-row t-band"><b class="badge-cyan">【设置】</b><b class="badge-cyan">【上传】</b><b class="badge-cyan">【下载】</b><b class="badge-cyan">【列表】</b><span class="c-dim">传输进度 (2/5)</span><span class="gauge"><span class="gauge-fill" style="width:43%"></span></span><b class="c-warn">43%</b></div>
+            <div class="t-row"><span class="c-text">deploy@pay-api:~$&nbsp;</span><span class="c-text">docker ps</span></div>
+            <div class="t-row cols docker"><span class="col-id c-accent b">CONTAINER ID</span><span class="col-img c-accent b">IMAGE</span><span class="col-cmd c-accent b">COMMAND</span><span class="col-status c-accent b">STATUS</span><span class="col-ports c-accent b">PORTS</span><span class="col-name c-accent b">NAMES</span></div>
+            <div class="t-row cols docker"><span class="col-id c-accent">9f2c1a7b3d4e</span><span class="col-img"><span class="c-alt">nginx</span><span class="c-text">:</span><span class="c-ok">1.27</span></span><span class="col-cmd c-dim">"/docker-entrypoint.…"</span><span class="col-status"><span class="c-ok">Up 3 days</span></span><span class="col-ports c-text">80/tcp</span><span class="col-name c-warn">web-nginx</span></div>
+            <div class="t-row cols docker"><span class="col-id c-accent">3b7e9c21d5a0</span><span class="col-img"><span class="c-alt">registry.example.net:5000/pay/app</span><span class="c-text">:</span><span class="c-ok">2.1</span></span><span class="col-cmd c-dim">"java -jar app.jar"</span><span class="col-status"><span class="c-alt">Restarting</span><span class="c-text">&nbsp;</span><span class="c-err">(1) 3 hours ago</span></span><span class="col-ports c-text">9000/tcp</span><span class="col-name c-warn">pay-gateway</span></div>
+            <div class="t-row cols docker"><span class="col-id c-accent">a1c9f04e2b77</span><span class="col-img"><span class="c-alt">redis</span><span class="c-text">:</span><span class="c-ok">7.2</span></span><span class="col-cmd c-dim">"docker-entrypoint.s…"</span><span class="col-status"><span class="c-ok">Up 2 weeks</span></span><span class="col-ports c-text">6379/tcp</span><span class="col-name c-warn">cache-01</span></div>
+            <div class="t-row"><span class="c-text">deploy@pay-api:~$&nbsp;</span><span class="c-text">tail -f /var/log/app/deploy.log</span></div>
+            <div class="t-row"><span class="c-dim">2026-10-06 09:14:22&nbsp;</span><span class="c-err b">ERROR&nbsp;</span><span class="c-text">upstream connect timeout to&nbsp;</span><span class="c-lb">198.51.100.30:6379</span><span class="c-text">&nbsp;(retry&nbsp;</span><span class="c-warn">45%</span><span class="c-text">)</span></div>
+            <div class="t-row"><span class="c-dim">2026-10-06 09:14:25&nbsp;</span><span class="c-accent">INFO&nbsp;</span><span class="c-accent">GET&nbsp;</span><span class="c-text">/health 200 up=</span><span class="c-warn">99.98%</span></div>
+            <div class="t-row"><span class="c-dim">2026-10-06 09:14:31&nbsp;</span><span class="c-warn">WARNING&nbsp;</span><span class="c-text">image pull backoff:&nbsp;</span><span class="c-alt">registry.example.net:5000/pay/app</span><span class="c-text">:</span><span class="c-ok">2.1</span></div>
+            <div class="t-row"><span class="c-text">deploy@pay-api:~$&nbsp;</span><span class="cursor">▏</span></div>
+          </div>
+        </div>
+        <figcaption class="shot-cap" data-i18n="shot.session.cap">会话 + 输出高亮：docker ps 的容器 ID / 镜像名 / 版本标签 / 容器名各归一档，日志级别、HTTP 方法、IPv4、百分比即时着色；时间戳和 COMMAND 弱化成灰，眼睛只看该看的地方。</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <div class="term" data-screen="browser">
+          <div class="term-chrome"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">ells-远程文件</span><span class="term-size">90 × 24</span></div>
+          <div class="term-body">
+            <div class="t-row t-band"><b class="c-accent">&nbsp;远端文件 /var/log&nbsp;</b><span class="c-dim">12 项</span><span class="grow"></span><b class="badge-cyan">【设置】</b><b class="badge-cyan">【上传】</b><b class="badge-cyan">【下载】</b><b class="badge-cyan">【列表】</b></div>
+            <div class="t-row t-tab"><span class="tabidle"> 1:pay-api </span><span class="rule">│</span><b class="sel"> 2:db-prod </b><span class="rule">│</span><b class="c-accent"> + </b><span class="c-dim">&nbsp;F2 新建 · F5/F6 切换 · Ctrl-] 关闭标签</span></div>
+            <div class="t-row t-files"><span class="c-accent b">nginx/</span><span class="grow"></span></div>
+            <div class="t-row t-files"><span class="c-accent b">supervisor/</span><span class="grow"></span></div>
+            <div class="t-row t-files"><span class="c-accent b">app/</span><span class="grow"></span></div>
+            <div class="t-row t-files is-sel"><span class="c-text">deploy.log</span><span class="grow"></span><span class="c-muted">4.2MB</span></div>
+            <div class="t-row t-files"><span class="c-text">access.log</span><span class="grow"></span><span class="c-muted">118.3MB</span></div>
+            <div class="t-row t-files"><span class="c-text">k8s-audit.log</span><span class="grow"></span><span class="c-muted">22.0KB</span></div>
+            <div class="t-row t-files"><span class="c-text">cert-rotate.txt</span><span class="grow"></span><span class="c-muted">512B</span></div>
+            <div class="t-row popup">
+              <div class="popup-box">
+                <div class="popup-title c-accent b">&nbsp;传输详情 · 点击或按键关闭&nbsp;</div>
+                <div class="popup-row"><span class="c-warn">&nbsp;下载 access.log · 34.2MB/118.3MB · 6.1MB/s&nbsp;</span><span class="gauge wide"><span class="gauge-fill" style="width:29%"></span></span></div>
+                <div class="popup-row"><span class="c-ok">&nbsp;上传 deploy.log · 完成&nbsp;</span></div>
+                <div class="popup-row"><span class="c-warn">&nbsp;下载 app/deploy-2026-10-05.log · 准备中…&nbsp;</span></div>
+                <div class="popup-row"><span class="c-err">&nbsp;下载 k8s-audit.log · 失败: permission denied&nbsp;</span></div>
+              </div>
+            </div>
+            <div class="t-row t-band"><span class="c-dim">&nbsp;↑↓/滚轮 选择 · Enter 进入/下载 · u 上传文件 · U 上传目录 · d 下载 · m 新建目录 · n 重命名 · D 删除 · Ctrl-C 取消传输 · r 刷新 · Esc 返回终端&nbsp;</span></div>
+          </div>
+        </div>
+        <figcaption class="shot-cap" data-i18n="shot.browser.cap">SFTP 文件浏览器：目录青色、文件正常色，Enter 进入或下载；传输详情弹窗里每条任务的字节数与实时速率都能看到，Ctrl-C 一次取消全部在途传输。</figcaption>
+      </figure>
+
+      <div class="shot-duo">
+      <figure class="shot">
+        <div class="term" data-screen="settings">
+          <div class="term-chrome"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">ells-主机列表</span><span class="term-size">72 × 24</span></div>
+          <div class="term-body">
+            <div class="t-row t-band"><b class="c-accent">&nbsp;ells&nbsp;</b><span class="c-dim">主机列表 · v0.1.7 · 构建 2026-10-06 09:12</span></div>
+            <div class="t-row popup">
+              <div class="popup-box tall">
+                <div class="popup-title c-accent b">&nbsp;全局设置&nbsp;</div>
+                <div class="set-row"><span class="c-text">&nbsp;终端输出高亮（docker / 日志级别）：</span><b class="c-ok">&nbsp;开&nbsp;</b></div>
+                <div class="set-row"><span class="c-text">&nbsp;SSH 空闲保活间隔：</span><b class="c-accent">&nbsp;60 秒&nbsp;</b><span class="c-dim">（15/30/60/120/300）</span></div>
+                <div class="set-row"><span class="c-text">&nbsp;主密码保护：</span><b class="c-ok">&nbsp;开 · 启动需输入主密码&nbsp;</b></div>
+                <div class="set-row"><span class="c-text">&nbsp;修改主密码：</span><span class="c-dim">&nbsp;Enter/点击 开始输入&nbsp;</span></div>
+                <div class="set-row"><span class="c-text">&nbsp;快捷键设置：</span><span class="c-dim">&nbsp;9 项可改 · Enter/点击 打开&nbsp;</span></div>
+                <div class="set-row focus"><span class="c-text">&nbsp;界面主题：</span><b class="c-accent">&nbsp;跟随终端（不画底色）&nbsp;</b><span class="c-dim">←→/Enter 切换</span></div>
+                <div class="set-row"><span class="c-text">&nbsp;自动更新：</span><b class="c-ok">&nbsp;开&nbsp;</b><span class="c-dim">&nbsp;最新 v0.1.8 · Enter 更新&nbsp;</span></div>
+                <div class="set-row"><span class="c-dim">&nbsp;↑↓ 选择 · Enter/点击 修改 · ←→ 微调 · Esc 取消</span></div>
+                <div class="set-row btns"><b class="badge-cyan">【 保 存 】</b><b class="badge-band">【 取 消 】</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="shot-cap" data-i18n="shot.settings.cap">全局设置：高亮开关、保活间隔、主密码保护、快捷键改键、界面主题、自动更新都在这一屏，改完点【保 存】才写入 <code>~/.ells/settings.ini</code>。</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <div class="term" data-screen="update">
+          <div class="term-chrome"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">ells-主机列表</span><span class="term-size">72 × 24</span></div>
+          <div class="term-body">
+            <div class="t-row t-band"><b class="c-accent">&nbsp;ells&nbsp;</b><span class="c-dim">主机列表 · v0.1.7 · 构建 2026-10-06 09:12</span><span class="grow"></span><b class="badge-warn">【v0.1.8 可更新】</b></div>
+            <div class="t-row t-list dimmed"><span class="c-ok">●</span><b class="c-warn">pay-api</b><span class="c-text">deploy@203.0.113.24:22</span><span class="c-muted">[密码]</span></div>
+            <div class="t-row t-list dimmed"><span class="c-ok">●</span><b class="c-warn">db-prod</b><span class="c-text">backup@198.51.100.7:22</span><span class="c-muted">[密钥]</span><span class="c-alt">经 bastion</span></div>
+            <div class="t-row popup">
+              <div class="popup-box">
+                <div class="popup-title c-warn b">正在更新 · ells-linux-x86_64</div>
+                <div class="popup-row"><span class="c-text">&nbsp;已下载 3.8MB / 9.2MB（41%）</span></div>
+                <div class="popup-row"><span class="gauge wide"><span class="gauge-fill" style="width:41%"></span></span></div>
+                <div class="popup-row"><span class="c-dim">&nbsp;校验通过才会替换文件，中途可取消。</span></div>
+                <div class="popup-row btns"><b class="badge-err">【 取消下载 】</b></div>
+              </div>
+            </div>
+            <div class="t-row t-band"><span class="c-dim">&nbsp;↑↓ 选择 · Enter 连接/切回 · a 新增 · e 编辑 · d 删除 · i 导入 · s 设置 · ? 帮助 · q 退出&nbsp;</span></div>
+          </div>
+        </div>
+        <figcaption class="shot-cap" data-i18n="shot.update.cap">应用内更新：点顶部徽标 → 确认 → 边下边算 SHA256，与 <code>SHA256SUMS.txt</code> 比对通过才原地替换自身；下载途中随时可取消，临时文件不留。</figcaption>
+      </figure>
+      </div>
+
+      <figure class="shot">
+        <div class="term" data-screen="unlock">
+          <div class="term-chrome"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">ells-解锁保险库</span><span class="term-size">72 × 20</span></div>
+          <div class="term-body">
+            <div class="t-row popup">
+              <div class="popup-box warn-border">
+                <div class="popup-title c-warn b">&nbsp;ells · 设置主密码 · v0.1.7 · 构建 2026-10-06 09:12&nbsp;</div>
+                <div class="popup-row"><span class="c-err b">&nbsp;! 主密码忘记后无法找回，ells 不做任何找回。</span></div>
+                <div class="popup-row"><span class="c-err">&nbsp;&nbsp;只能重置保险库重来：主机与凭据都要重填。</span></div>
+                <div class="popup-row"><span class="c-dim">&nbsp;&nbsp;主密码只加密本机保险库，不会发往任何服务器。</span></div>
+                <div class="popup-row"><span class="c-accent">&nbsp;主密码：•••••••</span><span class="cursor">▏</span></div>
+                <div class="popup-row"><span class="c-dim">&nbsp;Enter 下一步 · Esc 退出 · 请务必记牢</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="shot-cap" data-i18n="shot.unlock.cap">首次运行：设置主密码并创建保险库。EllS 把这条风险写在最显眼处——主密码没有任何找回途径，它也绝不会离开本机。</figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section id="install">
+  <div class="wrap">
+    <h2 data-i18n="install.h2">安装</h2>
+    <p class="section-sub" data-i18n="install.sub">一行命令搞定：脚本会挑对平台与架构、强制校验 <code>SHA256SUMS.txt</code>、把二进制放进 PATH，并注册短命令 <code>s</code>。校验不过直接退出，不会留下半个文件。</p>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3 data-i18n="install.oneline">一行安装</h3>
+        <div class="seg" role="tablist" aria-label="平台" data-seg="install">
+          <button type="button" class="seg-btn" data-os="windows" role="tab">Windows</button>
+          <button type="button" class="seg-btn" data-os="macos" role="tab">macOS</button>
+          <button type="button" class="seg-btn" data-os="linux" role="tab">Linux</button>
+        </div>
+      </div>
+
+      <div class="pane is-on" data-os="windows">
+        <p class="pane-lead" data-i18n="install.win.lead">在 PowerShell（Win 10/11 自带）里运行：</p>
+        <pre class="code" data-copy><code>irm https://raw.githubusercontent.com/lg10/ells/main/install.ps1 | iex</code></pre>
+        <ul class="pane-notes">
+          <li data-i18n="install.win.n1">产物是 <code>ells.exe</code>；正在运行的旧版本改名成 <code>ells.exe.old</code>，下次启动自动清掉。</li>
+          <li data-i18n="install.win.n2"><code>s</code> 短命令通过 PowerShell 配置文件里的函数注册；cmd 无需额外处理。</li>
+          <li data-i18n="install.win.n3">请用 <strong>Windows Terminal</strong>：旧版 conhost 对鼠标与 OSC 52 剪贴板支持不佳。</li>
+        </ul>
+      </div>
+
+      <div class="pane" data-os="macos">
+        <p class="pane-lead" data-i18n="install.mac.lead">在终端（bash / zsh）里运行：</p>
+        <pre class="code" data-copy><code>curl -fsSL https://raw.githubusercontent.com/lg10/ells/main/install.sh | sh</code></pre>
+        <ul class="pane-notes">
+          <li data-i18n="install.mac.n1">发布物是 <code>ells-macos-universal</code> 通用二进制，Intel 与 Apple Silicon 都由同一行命令装好，脚本会自动挑对。</li>
+          <li data-i18n="install.mac.n2">mac 上默认主题自动是「跟随终端（不画底色）」，不会出现灰底黑块。</li>
+          <li data-i18n="install.mac.n3">推荐 <strong>iTerm2</strong>：系统自带终端不支持 OSC 52 剪贴板；默认把功能键当媒体键，按 <code>F2</code>/<code>F3</code> 需要 <code>fn</code>，或到系统设置里改。</li>
+        </ul>
+      </div>
+
+      <div class="pane" data-os="linux">
+        <p class="pane-lead" data-i18n="install.linux.lead">在终端（bash / zsh）里运行：</p>
+        <pre class="code" data-copy><code>curl -fsSL https://raw.githubusercontent.com/lg10/ells/main/install.sh | sh</code></pre>
+        <ul class="pane-notes">
+          <li data-i18n="install.linux.n1">x86_64 有预编译包 <code>ells-linux-x86_64</code>；aarch64 请从源码构建（见下）。</li>
+          <li data-i18n="install.linux.n2">原生文件对话框需要桌面会话（X11 / Wayland），纯无头 TTY 弹不出来——用 <code>s &lt;别名&gt;</code> 直连与 SFTP 快捷键不受影响。</li>
+          <li data-i18n="install.linux.n3">GNOME / KDE 终端常占用 <code>F10</code>/<code>F11</code>，需要在终端偏好里放开。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid grid-two">
+      <div class="card">
+        <h3 data-i18n="install.vars.h">指定版本 / 安装目录 / 内网镜像</h3>
+        <p data-i18n="install.vars.p">用环境变量覆盖，安装脚本与应用内更新共用同一套约定：</p>
+        <pre class="code" data-copy><code># macOS / Linux：装指定版本、装到指定目录
+ELLS_VERSION=v0.1.7 curl -fsSL https://raw.githubusercontent.com/lg10/ells/main/install.sh | sh
+ELLS_INSTALL_DIR=/usr/local/bin curl -fsSL https://raw.githubusercontent.com/lg10/ells/main/install.sh | sh</code></pre>
+        <pre class="code" data-copy><code># Windows PowerShell
+$env:ELLS_VERSION='v0.1.7'; irm https://raw.githubusercontent.com/lg10/ells/main/install.ps1 | iex
+$env:ELLS_INSTALL_DIR="$env:USERPROFILE\bin"; irm https://raw.githubusercontent.com/lg10/ells/main/install.ps1 | iex</code></pre>
+        <p data-i18n="install.vars.mirror"><code>ELLS_API_URL</code> 换版本查询端点、<code>ELLS_DOWNLOAD_URL</code> 换资产基址，就能指向内网镜像。安装出问题时先跑 <code>sh diagnose.sh</code>，它会打印本机 shell / curl / 架构 / 代理的判定结果。</p>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="install.src.h">从源码构建</h3>
+        <p data-i18n="install.src.p">需要 <strong>Rust 1.85+</strong>（edition 2024）。代码库不含平台特定实现：crypto 统一用 <code>ring</code>，终端栈纯 Rust。</p>
+        <pre class="code" data-copy><code>cargo build --release -p ells
+./target/release/ells            # 主机列表
+./target/release/ells myserver   # 按别名直接连接</code></pre>
+        <p data-i18n="install.src.dep">Linux 源码构建需先装系统依赖 <code>pkg-config libwayland-dev</code>（文件选择对话框走 XDG 门户时依赖 wayland）；预编译二进制与一行安装不需要这一步。</p>
+        <h3 class="mt" data-i18n="install.un.h">卸载</h3>
+        <pre class="code" data-copy><code>curl -fsSL https://raw.githubusercontent.com/lg10/ells/main/uninstall.sh | sh
+# 连 ~/.ells 一起删（不可恢复）：
+curl -fsSL https://raw.githubusercontent.com/lg10/ells/main/uninstall.sh | sh -s -- --purge</code></pre>
+        <pre class="code" data-copy><code>irm https://raw.githubusercontent.com/lg10/ells/main/uninstall.ps1 | iex
+$env:ELLS_PURGE='1'; irm https://raw.githubusercontent.com/lg10/ells/main/uninstall.ps1 | iex</code></pre>
+        <p data-i18n="install.un.p">卸载只清理二进制、PATH 条目和 PowerShell 里的 <code>s</code> 函数，<strong>默认保留 <code>~/.ells</code></strong>（保险库、<code>known_hosts</code>、设置）——删二进制不该顺手毁掉凭据。EllS 不写注册表。确认不再需要这些主机时才用 <code>--purge</code> / <code>ELLS_PURGE=1</code>。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USAGE ============ -->
+<section id="usage" class="alt">
+  <div class="wrap">
+    <h2 data-i18n="usage.h2">怎么用</h2>
+    <p class="section-sub" data-i18n="usage.sub">第一次上手只需五步；之后的日常就是 <code>s</code> + 几个按键。</p>
+
+    <ol class="steps">
+      <li>
+        <h3 data-i18n="usage.s1.h">装好，重新打开终端</h3>
+        <p data-i18n="usage.s1.p">PATH 由脚本配置，所以要开新窗口。<code>ells</code> 与短命令 <code>s</code> 等价。</p>
+      </li>
+      <li>
+        <h3 data-i18n="usage.s2.h">设置主密码，创建保险库</h3>
+        <p data-i18n="usage.s2.p">首次运行会引导你设主密码并创建 <code>~/.ells/vault.bin</code>。之后每次启动输入主密码解锁，也可以在设置里关掉保护改成免密自动解锁（凭据仍只在本机加密保存）。</p>
+      </li>
+      <li>
+        <h3 data-i18n="usage.s3.h">按 <code>a</code> 添加主机，回车连接</h3>
+        <p data-i18n="usage.s3.p">表单里填别名、主机、端口、用户、认证方式（<code>←/→</code> 切换密码 / 密钥）与备注；<code>Ctrl-F</code> 选私钥、<code>Ctrl-J</code> 选跳板机。已有 OpenSSH 配置的主机，在列表按 <code>i</code> 一键从 <code>~/.ssh/config</code> 导入。首次连接会走主机密钥 TOFU：核对指纹后接受并记录，密钥日后变化会阻断告警。</p>
+      </li>
+      <li>
+        <h3 data-i18n="usage.s4.h">在会话里干活</h3>
+        <p data-i18n="usage.s4.p"><code>Ctrl-S</code> 开 SFTP 文件浏览器（<code>u</code> 上传、<code>d</code> 下载、<code>m</code> 新建目录、<code>n</code> 重命名、<code>D</code> 删除）；远端敲 <code>sz</code>/<code>rz</code> 也会被 EllS 拦下来改走 SFTP，弹出系统原生文件对话框。滚轮回看输出、拖选即复制、<code>F3</code> 搜索历史、<code>Ctrl-Q</code> 切直通模式、<code>Ctrl-G</code> 保持连接回列表。</p>
+      </li>
+      <li>
+        <h3 data-i18n="usage.s5.h">多开标签，新版本自己冒出来</h3>
+        <p data-i18n="usage.s5.p"><code>F2</code> 新建标签挂下一台服务器，<code>F5</code>/<code>F6</code> 或点标签切换；后台标签的输出与传输继续跑。有新版本时列表顶部出现 <code>【vX.Y.Z 可更新】</code> 徽标，点一下确认就下完并换好，重启即生效。</p>
+      </li>
+    </ol>
+
+    <div class="grid grid-two">
+      <div class="card">
+        <h3 data-i18n="usage.cli.h">命令行参数</h3>
+        <pre class="code"><code>ells [ALIAS] [--dev] [-y] [--check-update]</code></pre>
+        <table class="tbl">
+          <tbody>
+            <tr><td><code>ALIAS</code></td><td data-i18n="usage.cli.alias">解锁后立即连接该别名对应的主机（<code>s &lt;别名&gt;</code> 同义）</td></tr>
+            <tr><td><code>--dev</code></td><td data-i18n="usage.cli.dev">从 <code>~/.ells/hosts.dev.toml</code> 读取明文主机表（仅开发调试，不做持久化）</td></tr>
+            <tr><td><code>-y</code>, <code>--yes</code></td><td data-i18n="usage.cli.yes">首次见到的主机密钥自动接受并记录；密钥变更时仍然拒绝</td></tr>
+            <tr><td><code>--check-update</code></td><td data-i18n="usage.cli.check">只检查有没有新版本，打印结果就退出（不下载、不启动界面）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="usage.env.h">环境变量与配置文件</h3>
+        <table class="tbl">
+          <tbody>
+            <tr><td><code>ELLS_LOG=1</code></td><td data-i18n="usage.env.log">把内部日志写到 stderr</td></tr>
+            <tr><td><code>ELLS_ZMODEM_LOG=1</code></td><td data-i18n="usage.env.zmodem">额外把 sz/rz 拦截诊断写入 <code>~/.ells/zmodem.log</code></td></tr>
+            <tr><td><code>ELLS_YES=1</code></td><td data-i18n="usage.env.yes">等价于 <code>-y</code></td></tr>
+            <tr><td><code>ELLS_API_URL</code><br><code>ELLS_DOWNLOAD_URL</code></td><td data-i18n="usage.env.mirror">把版本查询与下载地址换成内网或镜像源（与安装脚本同一套约定）</td></tr>
+            <tr><td><code>ELLS_VERSION</code><br><code>ELLS_INSTALL_DIR</code></td><td data-i18n="usage.env.inst">安装脚本用：指定版本、指定安装目录</td></tr>
+          </tbody>
+        </table>
+        <p data-i18n="usage.files">配置都在 <code>~/.ells/</code>：<code>vault.bin</code>（保险库）、<code>settings.ini</code>（设置与主题）、<code>known_hosts</code>（主机密钥记录，OpenSSH 兼容）、<code>update.cache</code>（上次更新检查，只有版本与时间两行，不含任何主机信息）。</p>
+      </div>
+    </div>
+
+    <div class="card wide">
+      <h3 data-i18n="usage.upd.h">应用内更新做了什么</h3>
+      <p data-i18n="usage.upd.p">EllS 每次启动都在后台问一次"有没有新版本"——只发一个 HEAD 请求、从 GitHub 的重定向地址读版本号，不下载任何内容，也不占匿名 API 限额。点徽标确认后按顺序做四件事：</p>
+      <ol class="flow">
+        <li data-i18n="usage.upd.1">下载本平台对应的发布资产到 EllS 所在目录的临时文件。</li>
+        <li data-i18n="usage.upd.2"><strong>边下边算 SHA256</strong>，和 <code>SHA256SUMS.txt</code> 比对；校验不过（或没下完）就删掉临时文件，<strong>绝不替换</strong>。</li>
+        <li data-i18n="usage.upd.3">原地换上新二进制。Windows 上运行中的镜像删不掉但能改名，于是先改成 <code>ells.exe.old</code> 再换进去，本次会话照常跑完；换失败会原样改回来。</li>
+        <li data-i18n="usage.upd.4">提示"新版本已就位"——盘上是新的了，进程还是旧的，点【立即重启】或按 Enter 换新安。确认框会先说明这会断开手上几路会话。</li>
+      </ol>
+      <p data-i18n="usage.upd.off">不想让它自己查：进设置把「自动更新」按 <code>←</code> 关掉（写入 <code>auto_update=false</code>），之后仍可在同一行按 Enter 手动检查。启动那次自动检查失败是静默的（没网不该拦人），只有你主动检查才会看到中文的失败原因。没有预编译包的平台（例如 Linux aarch64）不会尝试自替换，而是提示改用安装脚本。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ KEYS ============ -->
+<section id="keys">
+  <div class="wrap">
+    <h2 data-i18n="keys.h2">快捷键</h2>
+    <p class="section-sub" data-i18n="keys.sub">表中这些标签与会话组合键（<code>F2</code>/<code>F5</code>/<code>F6</code>/<code>Ctrl-]</code>/<code>Ctrl-G</code>/<code>Ctrl-S</code>/<code>Ctrl-Q</code>/<code>Ctrl-L</code>/<code>F3</code>）都只是默认值，可在「主机列表 <code>s</code> → 设置 → 快捷键设置」里改：选中一项按 Enter 录制，只接受 F2–F9 或带 Ctrl/Alt 的组合键，撞上已占用的键时两个动作自动互换，改完即时生效并写入 <code>settings.ini</code>。</p>
+
+    <div class="keytabs">
+      <div class="seg" role="tablist" aria-label="界面" data-seg="keys">
+        <button type="button" class="seg-btn is-on" data-pane="k-list" role="tab" data-i18n="keys.tab.list">主机列表</button>
+        <button type="button" class="seg-btn" data-pane="k-tabs" role="tab" data-i18n="keys.tab.tabs">多标签</button>
+        <button type="button" class="seg-btn" data-pane="k-session" role="tab" data-i18n="keys.tab.session">会话</button>
+        <button type="button" class="seg-btn" data-pane="k-file" role="tab" data-i18n="keys.tab.file">文件浏览器</button>
+        <button type="button" class="seg-btn" data-pane="k-form" role="tab" data-i18n="keys.tab.form">主机表单</button>
+      </div>
+
+      <div class="kpane is-on" id="k-list">
+        <ul class="kblist">
+          <li><kbd>↑↓</kbd><kbd>j</kbd><kbd>k</kbd><span data-i18n="k.list.move">选择主机</span></li>
+          <li><kbd>Enter</kbd><span data-i18n="k.list.enter">连接（这台已连着就切回它那一格标签）</span></li>
+          <li><kbd>a</kbd><span data-i18n="k.list.add">新增主机</span></li>
+          <li><kbd>e</kbd><span data-i18n="k.list.edit">编辑主机</span></li>
+          <li><kbd>d</kbd><span data-i18n="k.list.del">删除（二级确认）</span></li>
+          <li><kbd>s</kbd><span data-i18n="k.list.set">打开设置</span></li>
+          <li><kbd>i</kbd><span data-i18n="k.list.imp">导入 <code>~/.ssh/config</code></span></li>
+          <li><kbd>?</kbd><kbd>F1</kbd><span data-i18n="k.list.help">完整键位帮助页</span></li>
+          <li><kbd>q</kbd><kbd>Ctrl-C</kbd><span data-i18n="k.list.quit">退出</span></li>
+        </ul>
+        <p class="knote" data-i18n="k.list.note">行首 <code>●</code> 已连接 / <code>○</code> 正在连接 / <code>·</code> 空闲；顶部标签条点一下就切回去。</p>
+      </div>
+
+      <div class="kpane" id="k-tabs">
+        <ul class="kblist">
+          <li><kbd>F2</kbd><span data-i18n="k.tabs.new">新建标签</span></li>
+          <li><kbd>F5</kbd><span data-i18n="k.tabs.next">下一个标签</span></li>
+          <li><kbd>F6</kbd><span data-i18n="k.tabs.prev">上一个标签</span></li>
+          <li><kbd>Ctrl-]</kbd><span data-i18n="k.tabs.close">关闭当前标签（只剩一个时退回主机列表；有传输在跑时要按两次）</span></li>
+          <li><kbd>Ctrl-G</kbd><span data-i18n="k.tabs.back">保持连接回到主机列表，再按一次回到原来那一页</span></li>
+          <li><span class="mouse">🖱</span><span data-i18n="k.tabs.mouse">鼠标点顶部标签切换、点末尾 <code>+</code> 新建</span></li>
+        </ul>
+      </div>
+
+      <div class="kpane" id="k-session">
+        <ul class="kblist">
+          <li><span class="mouse">⌨</span><span data-i18n="k.session.raw">任意按键直达远端</span></li>
+          <li><kbd>Ctrl-Q</kbd><span data-i18n="k.session.mode">内嵌 / 直通切换</span></li>
+          <li><kbd>Ctrl-S</kbd><span data-i18n="k.session.sftp">打开 SFTP 浏览器</span></li>
+          <li><kbd>Ctrl-L</kbd><span data-i18n="k.session.redraw">重绘</span></li>
+          <li><kbd>F3</kbd><span data-i18n="k.session.search">搜索历史输出（回看时按 <code>/</code> 同样可用，<code>n</code>/<code>N</code> 跳上下条）</span></li>
+          <li><span class="mouse">🖱 滚轮</span><span data-i18n="k.session.wheel">回看历史且保留颜色</span></li>
+          <li><span class="mouse">🖱 拖选</span><span data-i18n="k.session.drag">复制（OSC 52）</span></li>
+          <li><kbd>F1</kbd><span data-i18n="k.session.help">帮助</span></li>
+        </ul>
+        <p class="knote" data-i18n="k.session.note">面板底部会按当前平台提示该终端自己的占用情况：Windows Terminal 占 <code>Ctrl+1–8</code> 与 <code>F11</code>；macOS 默认把功能键当媒体键，要按 <code>fn</code>；把 Option 设为 Meta 才能用 <code>Alt</code> 组合；GNOME/KDE 终端占用 <code>F10</code>/<code>F11</code>。</p>
+      </div>
+
+      <div class="kpane" id="k-file">
+        <ul class="kblist">
+          <li><kbd>Enter</kbd><span data-i18n="k.file.enter">进入目录 / 下载</span></li>
+          <li><kbd>u</kbd><span data-i18n="k.file.up">上传文件</span></li>
+          <li><kbd>U</kbd><span data-i18n="k.file.updir">上传整个目录</span></li>
+          <li><kbd>d</kbd><span data-i18n="k.file.down">下载</span></li>
+          <li><kbd>m</kbd><span data-i18n="k.file.mkdir">新建目录</span></li>
+          <li><kbd>n</kbd><span data-i18n="k.file.rename">重命名</span></li>
+          <li><kbd>D</kbd><span data-i18n="k.file.delete">删除（递归，先确认）</span></li>
+          <li><kbd>Ctrl-C</kbd><span data-i18n="k.file.cancel">取消全部在途传输</span></li>
+          <li><kbd>r</kbd><span data-i18n="k.file.refresh">刷新</span></li>
+          <li><kbd>Backspace</kbd><span data-i18n="k.file.parent">返回上级</span></li>
+          <li><kbd>Esc</kbd><span data-i18n="k.file.back">返回终端</span></li>
+        </ul>
+      </div>
+
+      <div class="kpane" id="k-form">
+        <ul class="kblist">
+          <li><kbd>Tab</kbd><kbd>↑↓</kbd><span data-i18n="k.form.move">切换输入项</span></li>
+          <li><kbd>←→</kbd><span data-i18n="k.form.auth">切换认证方式</span></li>
+          <li><kbd>Ctrl-F</kbd><span data-i18n="k.form.key">选私钥</span></li>
+          <li><kbd>Ctrl-J</kbd><span data-i18n="k.form.jump">选跳板机</span></li>
+          <li><kbd>Enter</kbd><span data-i18n="k.form.enter">在"私钥路径 / 跳板机"上直接打开选择器</span></li>
+          <li><kbd>Esc</kbd><span data-i18n="k.form.esc">在确认弹窗里取消；<code>←→</code>/<kbd>Tab</kbd> 切换选项，<kbd>Enter</kbd> 确认</span></li>
+        </ul>
+        <p class="knote" data-i18n="k.form.note">保存点【保 存】按钮或回车；私钥口令只在私钥本身加密时才需要填。</p>
+      </div>
+
+      <p class="knote" data-i18n="keys.theme">界面配色也可选：「主机列表 <code>s</code> → 设置 → 界面主题」按 Enter 或 <code>←→</code> 循环四套——<strong>深色（画死底色）</strong> 黑底灰条，Windows 上最贴；<strong>跟随终端（不画底色）</strong> 底与正文色都用终端自己的主题，macOS 终端 / iTerm2 / WezTerm 推荐，也是 mac 上的默认；<strong>高对比</strong> 去掉灰色小字，层级靠粗体与反显；<strong>浅色底</strong> 给白底终端的深字配色。改完立刻预览，点【保 存】才写入 <code>settings.ini</code> 的 <code>theme=</code>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" class="alt">
+  <div class="wrap narrow">
+    <h2 data-i18n="faq.h2">常见问题</h2>
+    <div class="faq">
+      <details>
+        <summary data-i18n="faq.q1">忘了主密码怎么办？</summary>
+        <p data-i18n="faq.a1">没有任何找回途径——EllS 不做找回，也不会把密码发往任何服务器。只能重置保险库重来，主机与凭据都要重填。这也是首次运行那屏把警告写在最上面的原因。觉得每次输密码麻烦，可以在设置里关掉主密码保护，改成启动自动解锁（凭据仍以 Argon2id + XChaCha20Poly1305 加密存在本机 <code>vault.bin</code>）。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q2">凭据到底存在哪、会不会上传？</summary>
+        <p data-i18n="faq.a2">只存本机 <code>~/.ells/vault.bin</code>。密码派生密钥用 Argon2id，加密用 XChaCha20Poly1305 认证加密。零遥测：没有埋点、没有上报，版本检查只有一个面向 GitHub 发布页的 HEAD 请求。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q3">高亮会不会盖掉程序自己输出的颜色？</summary>
+        <p data-i18n="faq.a3">不会。高亮只作用于"默认前景色"的单元格，程序自己发出的 ANSI 颜色一律保留；设置里也能整屏关掉（「终端输出高亮」）。判据也刻意收紧：<code>docker ps</code> 只认行首正好一段 12 位（或 <code>--no-trunc</code> 的 64 位）小写十六进制 ID，git 的 7~8 位短哈希不会被误染；镜像版本只看最后一个 <code>/</code> 之后的冒号，所以 <code>registry.corp.com:5000/pay/app:2.1</code> 里端口号不会被当成版本。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q4">远端需要装 lrzsz 吗？</summary>
+        <p data-i18n="faq.a4">不需要服务端配合。EllS 在远端输出流里做协议级 ZMODEM 握手检测，识别到 <code>sz</code>/<code>rz</code> 意图后改走 SFTP 通道传输，所以你既有 Xshell 那种"敲 sz 就弹框"的手感，又有真实进度条与系统原生文件对话框。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q5">内嵌终端显示某个全屏程序不对，怎么办？</summary>
+        <p data-i18n="faq.a5">先 <code>Ctrl-L</code> 重绘；仍不对就按 <code>Ctrl-Q</code> 切直通模式——此时 EllS 不再解释字节流，把终端原样交给远端程序，这是刻意保留的兜底逃生门。注意直通模式下远端独占屏幕，要回主机列表得先按 <code>Ctrl-Q</code> 回内嵌。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q6">为什么推荐 Windows Terminal / iTerm2？</summary>
+        <p data-i18n="faq.a6">旧版 conhost 对鼠标事件与 OSC 52 剪贴板支持不佳，macOS 自带终端不支持 OSC 52（拖选复制会失效）。另外 mac 上 <code>ells</code> 的窗口标题、标签页标题会随页面联动（连接后显示 <code>ells-别名</code>），在支持的终端里最直观。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q7">Linux aarch64、或者完全无桌面的机器？</summary>
+        <p data-i18n="faq.a7">aarch64 目前没有预编译包：请从源码构建（<code>cargo build --release -p ells</code>），应用内更新也不会尝试自替换，而是提示改用安装脚本。无桌面会话时原生文件对话框弹不出来，纯无头 TTY 尤其如此；连 SSH、传文件（SFTP 快捷键）本身不受影响。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q8">安装 / 更新失败先看什么？</summary>
+        <p data-i18n="faq.a8">跑 <code>sh diagnose.sh</code>，它会打印本机 shell / curl / 架构 / 代理等判定结果。<code>ells --check-update</code> 只查版本、打印结果就退出，供脚本与排障用。设 <code>ELLS_LOG=1</code> 让内部日志写到 stderr，<code>ELLS_ZMODEM_LOG=1</code> 把 sz/rz 拦截诊断写入 <code>~/.ells/zmodem.log</code>。反馈问题时请先升级到最新版，并抹掉日志里的主机地址、路径与用户名。</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q9">EllS 现在是成熟版本吗？</summary>
+        <p data-i18n="faq.a9">还在早期：v0.1.x，可能有 Bug、功能尚不完善，欢迎提 Issue。已落地主机密钥 TOFU、三平台预编译包、多会话标签页、主题层与应用内更新；路线图上还差 ssh-agent 认证（目前支持密码与私钥，含私钥口令）。每个版本的细项见 CHANGELOG。</p>
+      </details>
+    </div>
+
+    <div class="endcard">
+      <h3 data-i18n="end.h">三分钟装好，一个终端管所有服务器</h3>
+      <p data-i18n="end.p">MIT 开源 · 单文件二进制 · 零遥测 · Windows / macOS / Linux。</p>
+      <div class="hero-cta center">
+        <a class="btn btn-primary" href="#install" data-i18n="end.cta1">现在安装</a>
+        <a class="btn btn-ghost" href="https://github.com/lg10/ells" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-brand">EllS</p>
+      <p class="foot-line" data-i18n="foot.tag">一个活在终端里的轻量级跨平台 SSH 客户端。</p>
+      <p class="foot-line dim" data-i18n="foot.early">早期版本 v0.1.x：可能存在 Bug、功能尚不完善。</p>
+    </div>
+    <div>
+      <h4 data-i18n="foot.h.doc">文档</h4>
+      <a href="#install" data-i18n="foot.l.install">安装</a>
+      <a href="#usage" data-i18n="foot.l.usage">使用说明</a>
+      <a href="#keys" data-i18n="foot.l.keys">快捷键</a>
+      <a href="#screens" data-i18n="foot.l.screens">界面</a>
+    </div>
+    <div>
+      <h4 data-i18n="foot.h.code">代码与发布</h4>
+      <a href="https://github.com/lg10/ells" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/lg10/ells/releases" target="_blank" rel="noopener" data-i18n="foot.l.releases">Releases</a>
+      <a href="https://github.com/lg10/ells/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG</a>
+      <a href="https://ells.cn" target="_blank" rel="noopener">ells.cn</a>
+    </div>
+    <div>
+      <h4 data-i18n="foot.h.safe">安全与许可</h4>
+      <a href="https://github.com/lg10/ells/blob/main/SECURITY.md" target="_blank" rel="noopener" data-i18n="foot.l.sec">安全策略（请走私密渠道）</a>
+      <a href="https://github.com/lg10/ells/issues" target="_blank" rel="noopener" data-i18n="foot.l.issue">提 Bug / 功能建议</a>
+      <a href="https://github.com/lg10/ells/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <p data-i18n="foot.copy">本页为纯前端静态站，无追踪、无 Cookie；界面图按真实渲染还原并已隐去全部真实地址。</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
